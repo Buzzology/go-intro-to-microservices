@@ -9,7 +9,7 @@ Video #3: https://www.youtube.com/watch?v=eBeqtmrvVpg
 REST, starting to create an "online coffee shop". Implementing the products GET handler.
 
 Video #4: https://www.youtube.com/watch?v=UZbHLVsjpF0  
-More REST, using other methods, 
+More REST -> Update product, create product, etc.  
 
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.
