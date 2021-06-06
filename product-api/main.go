@@ -14,14 +14,14 @@ import (
 func main() {
 
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
-	helloHandler := handlers.NewHello(l)
-	goodbyeHandler := handlers.NewGoodbye(l)
+	// helloHandler := handlers.NewHello(l)
+	// goodbyeHandler := handlers.NewGoodbye(l)
 	productHandler := handlers.NewProducts(l)
 
 	sm := http.NewServeMux()
-	sm.Handle("/products", productHandler)
-	sm.Handle("/goodbye", goodbyeHandler)
-	sm.Handle("/", helloHandler)
+	sm.Handle("/products/", productHandler) // NOTE: Default ServerMux pattern requires trailing slash to match on child paths
+	// sm.Handle("/goodbye", goodbyeHandler)
+	// sm.Handle("/", helloHandler)
 
 	s := http.Server{
 		Addr: "127.0.0.1:9090",
