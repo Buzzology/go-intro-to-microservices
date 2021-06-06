@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"time"
-	"github.com/Buzzology/go-intro-to-microservices/handlers"
+	"github.com/Buzzology/go-intro-to-microservices/product-api/handlers"
 )
 
 
@@ -16,8 +16,10 @@ func main() {
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
 	helloHandler := handlers.NewHello(l)
 	goodbyeHandler := handlers.NewGoodbye(l)
+	productHandler := handlers.NewProducts(l)
 
 	sm := http.NewServeMux()
+	sm.Handle("/products", productHandler)
 	sm.Handle("/goodbye", goodbyeHandler)
 	sm.Handle("/", helloHandler)
 
