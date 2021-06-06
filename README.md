@@ -6,7 +6,10 @@ Video #2: https://www.youtube.com/watch?v=hodOppKJm5Y
 Extract handlers, use channel to create blocking code that waits for interrupt or kill commands before gracefully shutting down.  
 
 Video #3: https://www.youtube.com/watch?v=eBeqtmrvVpg  
-REST, starting to create an "online coffee shop"  
+REST, starting to create an "online coffee shop". Implementing the products GET handler.
+
+Video #4: https://www.youtube.com/watch?v=UZbHLVsjpF0  
+More REST, using other methods, 
 
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.
