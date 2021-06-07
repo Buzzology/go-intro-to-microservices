@@ -21,14 +21,17 @@ func main() {
 	productHandler := handlers.NewProducts(l)
 
 	sm := mux.NewRouter()
+
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/", productHandler.GetProducts)
 
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
 	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct) 
+	putRouter.Use(productHandler.MiddlewareProductionValidation)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/", productHandler.AddProduct)
+	postRouter.Use(productHandler.MiddlewareProductionValidation)
 
 	s := http.Server{
 		Addr: "127.0.0.1:9090",
