@@ -11,6 +11,10 @@ REST, starting to create an "online coffee shop". Implementing the products GET 
 Video #4: https://www.youtube.com/watch?v=UZbHLVsjpF0  
 More REST -> Update product, create product, etc.  
 
+Video #5: https://www.youtube.com/watch?v=DD3JlT_u0DM  
+Using Gorilla framework for rest services  
+
+
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.
 
@@ -31,3 +35,8 @@ type Product struct {
 // Outputs
 {"id":1,"name":"Latte","description":"Frothy milky coffee","price":2.45,"sku":"abc323"}
 ```
+
+## Gorilla
+https://www.gorillatoolkit.org/  
+
+Install: `go get github.com/gorilla/mux`  

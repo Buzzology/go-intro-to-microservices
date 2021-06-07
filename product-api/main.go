@@ -7,7 +7,9 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
 	"github.com/Buzzology/go-intro-to-microservices/product-api/handlers"
+	"github.com/gorilla/mux"
 )
 
 
@@ -18,10 +20,15 @@ func main() {
 	// goodbyeHandler := handlers.NewGoodbye(l)
 	productHandler := handlers.NewProducts(l)
 
-	sm := http.NewServeMux()
-	sm.Handle("/products/", productHandler) // NOTE: Default ServerMux pattern requires trailing slash to match on child paths
-	// sm.Handle("/goodbye", goodbyeHandler)
-	// sm.Handle("/", helloHandler)
+	sm := mux.NewRouter()
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", productHandler.GetProducts)
+
+	putRouter := sm.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct) 
+
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", productHandler.AddProduct)
 
 	s := http.Server{
 		Addr: "127.0.0.1:9090",
