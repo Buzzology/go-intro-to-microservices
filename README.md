@@ -1,4 +1,6 @@
 #
+A video series by Nic Jackson covering the basics on how to create microservices in Go: https://www.youtube.com/playlist?list=PLmD8u-IFdreyh6EUfevBcbiuCKzFk0EW_  
+
 Video #1: https://www.youtube.com/watch?v=VzBGi_n65iU   
 Introduction and setting up a http web server.  
 
@@ -12,7 +14,10 @@ Video #4: https://www.youtube.com/watch?v=UZbHLVsjpF0
 More REST -> Update product, create product, etc.  
 
 Video #5: https://www.youtube.com/watch?v=DD3JlT_u0DM  
-Using Gorilla framework for rest services  
+Using Gorilla framework for rest services. Adding middleware for validation  
+
+Video #6: https://www.youtube.com/watch?v=gE8_-8KoOLc  
+JSON validation.  
 
 
 ## Setup notes
@@ -38,5 +43,9 @@ type Product struct {
 
 ## Gorilla
 https://www.gorillatoolkit.org/  
-
 Install: `go get github.com/gorilla/mux`  
+
+
+## Validator
+https://github.com/go-playground/validator  
+ 

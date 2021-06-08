@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -64,8 +65,16 @@ func (p Products) MiddlewareProductionValidation(next http.Handler) http.Handler
 		product := &data.Product{}
 		err := product.FromJSON(req.Body)
 		if err != nil {
+			p.l.Println("[ERROR] unmarshalling product", err)
 			http.Error(rw, "Failed to unmarshal request body into product.", http.StatusBadRequest)
 			return // If it fails to validate we terminate the handler chain
+		}
+
+		err = product.Validate()
+		if err != nil {
+			p.l.Println("[ERROR] validating product", err)
+			http.Error(rw, fmt.Sprintf("Failed to validate product. %s", err), http.StatusBadRequest)
+			return
 		}
 
 		// We assign product to the context using a struct. You can use a string but I think
