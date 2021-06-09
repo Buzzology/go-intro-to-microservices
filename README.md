@@ -17,7 +17,10 @@ Video #5: https://www.youtube.com/watch?v=DD3JlT_u0DM
 Using Gorilla framework for rest services. Adding middleware for validation  
 
 Video #6: https://www.youtube.com/watch?v=gE8_-8KoOLc  
-JSON validation.  
+JSON validation and an initial unit test.
+
+Video #7: https://www.youtube.com/watch?v=07XhTqE-j8k  
+Adding swagger to the rest api.
 
 
 ## Setup notes
@@ -48,4 +51,33 @@ Install: `go get github.com/gorilla/mux`
 
 ## Validator
 https://github.com/go-playground/validator  
- 
+
+
+## Swagger   
+https://goswagger.io/   
+Install: `go get -u github.com/go-swagger/go-swagger/cmd/swagger`
+
+*Empty swagger yaml generated*  
+This can happen if there is a blank line between the comment and the package declaration:
+```
+...
+//     Consumes: 
+//     - application/json
+// swagger:meta
+
+package handlers // NOTE: Line break above ^^^
+
+import (
+...
+```
+
+Change it to this:  
+```
+//     Consumes: 
+//     - application/json
+// swagger:meta
+package handlers  // NOTE: Line break above removed
+
+import (
+```
+

@@ -16,8 +16,6 @@ import (
 func main() {
 
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
-	// helloHandler := handlers.NewHello(l)
-	// goodbyeHandler := handlers.NewGoodbye(l)
 	productHandler := handlers.NewProducts(l)
 
 	sm := mux.NewRouter()
@@ -32,6 +30,9 @@ func main() {
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/", productHandler.AddProduct)
 	postRouter.Use(productHandler.MiddlewareProductionValidation)
+
+	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
+	deleteRouter.HandleFunc("/{id:[0-9]+}", productHandler.DeleteProduct)
 
 	s := http.Server{
 		Addr: "127.0.0.1:9090",
