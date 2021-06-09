@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/Buzzology/go-intro-to-microservices/product-api/handlers"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
 )
-
 
 func main() {
 
@@ -24,7 +24,7 @@ func main() {
 	getRouter.HandleFunc("/", productHandler.GetProducts)
 
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
-	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct) 
+	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct)
 	putRouter.Use(productHandler.MiddlewareProductionValidation)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
@@ -34,12 +34,18 @@ func main() {
 	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
 	deleteRouter.HandleFunc("/{id:[0-9]+}", productHandler.DeleteProduct)
 
+	// Add swagger
+	opt := middleware.RedocOpts{SpecURL: "/swagger.yaml"} // Points to generated swagger
+	sh := middleware.Redoc(opt, nil)
+	getRouter.Handle("/docs", sh)
+	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
+
 	s := http.Server{
-		Addr: "127.0.0.1:9090",
-		Handler: sm,
-		IdleTimeout: 120*time.Second,
-		ReadTimeout: 1 *time.Second,
-		WriteTimeout: 1 *time.Second,
+		Addr:         "127.0.0.1:9090",
+		Handler:      sm,
+		IdleTimeout:  120 * time.Second,
+		ReadTimeout:  1 * time.Second,
+		WriteTimeout: 1 * time.Second,
 	}
 
 	go func() {
@@ -54,7 +60,7 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, os.Kill)
 
-	sig := <- sigChan // Read from signal channel (this appears to block until a message is received on the channel. Message is received when kill or cancel are invoked)
+	sig := <-sigChan // Read from signal channel (this appears to block until a message is received on the channel. Message is received when kill or cancel are invoked)
 	l.Println("Received terminate, graceful shutdown", sig)
 
 	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)

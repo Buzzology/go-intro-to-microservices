@@ -55,7 +55,8 @@ https://github.com/go-playground/validator
 
 ## Swagger   
 https://goswagger.io/   
-Install: `go get -u github.com/go-swagger/go-swagger/cmd/swagger`
+Install: `go get -u github.com/go-swagger/go-swagger/cmd/swagger`  
+Generate: `make swagger` from product-api dir  
 
 *Empty swagger yaml generated*  
 This can happen if there is a blank line between the comment and the package declaration:

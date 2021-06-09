@@ -18,6 +18,25 @@ import (
 	"github.com/Buzzology/go-intro-to-microservices/product-api/data"
 )
 
+// A list of products returned in the response (note this is only used for doco)
+// swagger:response productsResponse
+type productsResponseWrapper struct {
+	// All products in the system
+	// in: body
+	Body[]data.Product
+}
+
+// swagger:parameters deleteProduct
+type productIdParameterWrapper struct {
+	// The id of the product to delete from the database
+	// in: path
+	// required: true
+	ID int `json:"id"`
+}
+
+// swagger:response NoContent
+type productsNoContent struct {}
+
 type Products struct {
 	l *log.Logger
 }
