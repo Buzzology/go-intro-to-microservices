@@ -22,6 +22,14 @@ JSON validation and an initial unit test.
 Video #7: https://www.youtube.com/watch?v=07XhTqE-j8k  
 Adding swagger to the rest api.
 
+Video #8: https://www.youtube.com/watch?v=Zn4joNjqBFc  
+Auto-generating HTTP clients from Swagger files. Kind of skipped this one.
+
+Video #9: https://www.youtube.com/watch?v=RlYoy_RiYPw  
+Setting up CORS using Gorilla.  
+
+Video #10: https://www.youtube.com/watch?v=ctmhYJpGsgU  
+
 
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.

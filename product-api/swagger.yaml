@@ -30,7 +30,8 @@ definitions:
     x-go-package: github.com/Buzzology/go-intro-to-microservices/product-api/data
 info:
   description: Documentation for Product API
-  title: Product API
+  title: of Product API
+  version: 1.0.0
 paths:
   /products:
     get:
@@ -58,6 +59,8 @@ paths:
           $ref: '#/responses/NoContent'
       tags:
       - products
+produces:
+- application/json
 responses:
   NoContent:
     description: ""

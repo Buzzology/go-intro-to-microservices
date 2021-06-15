@@ -14,10 +14,10 @@ require (
 	github.com/go-swagger/go-swagger v0.27.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/pelletier/go-toml v1.9.2 // indirect
+	github.com/pelletier/go-toml v1.9.3 // indirect
 	go.mongodb.org/mongo-driver v1.5.3 // indirect
-	golang.org/x/net v0.0.0-20210525063256-abc453219eb5 // indirect
-	golang.org/x/sys v0.0.0-20210608053332-aa57babbf139 // indirect
-	golang.org/x/tools v0.1.2 // indirect
+	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
+	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
+	golang.org/x/tools v0.1.3 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
