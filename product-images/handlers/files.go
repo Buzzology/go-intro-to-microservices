@@ -28,6 +28,12 @@ func (f *Files) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	f.log.Info("Handle POST", "id", id, "filename", fn)
 
+	// Validate the file
+	if id == "" || fn == "" {
+		f.invalidURI(r.URL.String(), rw)
+		return
+	}
+
 	// check that the filepath is a valid name and file
 	f.saveFile(id, fn, rw, r)
 }

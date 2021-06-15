@@ -46,6 +46,11 @@ func main() {
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
 
+	// filename regex: {filename:[a-zA-Z]+\\.[a-z]{3}}
+	// problem with FileServer is that is dumb
+	ph := sm.Methods(http.MethodPost).Subrouter()
+	ph.HandleFunc("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", fh.ServeHTTP)
+
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 
 	// problem with FileServer is that it is dumb
@@ -75,6 +80,8 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
+	l.Info("Running product-images...")
 
 	// trap sigterm or interupt and gracefully shutdown the server
 	c := make(chan os.Signal, 1)
