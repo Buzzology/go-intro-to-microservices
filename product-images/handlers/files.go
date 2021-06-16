@@ -58,7 +58,7 @@ func (f *Files) saveFile(id, path string, rw http.ResponseWriter, r *http.Reques
 // get the file from the store and returns it to the user in a gzipped format
 func (f *Files) getFile(id, path string, rw http.ResponseWriter, r *http.Request) {
 	f.log.Info("Get file for product", "id", id, "path", path)
-
+	id = id
 	/*
 		fp := filepath.Join(id, path)
 		fr, err := f.store.Get(fp)

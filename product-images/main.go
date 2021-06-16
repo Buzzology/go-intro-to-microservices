@@ -16,7 +16,7 @@ import (
 
 var bindAddress = env.String("BIND_ADDRESS", false, ":9090", "Bind address for the server")
 var logLevel = env.String("LOG_LEVEL", false, "debug", "Log output level for the server [debug, info, trace]")
-var basePath = env.String("BASE_PATH", false, "/tmp/images", "Base path to save images")
+var basePath = env.String("BASE_PATH", false, "./tmp/images", "Base path to save images")
 
 func main() {
 
@@ -51,11 +51,13 @@ func main() {
 	ph := sm.Methods(http.MethodPost).Subrouter()
 	ph.HandleFunc("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", fh.ServeHTTP)
 
-	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	// Get files
+	gh := sm.Methods(http.MethodGet).Subrouter()
+	gh.Handle("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", http.StripPrefix("/images/", http.FileServer(http.Dir(*basePath))))
 
-	// problem with FileServer is that it is dumb
-	getRouter.Handle("/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", http.FileServer(http.Dir(*basePath)))
-	getRouter.Use(handlers.GZipResponseMiddleware)
+	//// problem with FileServer is that it is dumb
+	//getRouter.Handle("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", http.FileServer(http.Dir(*basePath)))
+	//getRouter.Use(handlers.GZipResponseMiddleware)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.Handle("/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", fh)
