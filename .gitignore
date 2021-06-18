@@ -1,3 +1,4 @@
+src/github.com/Buzzology/go-intro-to-microservices
 __debug_bin
 .idea
 .idea/.iws
@@ -5,3 +6,4 @@ __debug_bin
 **/.idea/tasks.xml
 **/.idea/*
 .idea/*
+*

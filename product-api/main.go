@@ -59,6 +59,9 @@ func main() {
 		}
 	}()
 
+	l.Println("Starting Product API...")
+
+
 	// Make a channel of os signal type
 	sigChan := make(chan os.Signal)
 	signal.Notify(sigChan, os.Interrupt)
