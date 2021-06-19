@@ -29,7 +29,13 @@ Video #9: https://www.youtube.com/watch?v=RlYoy_RiYPw
 Setting up CORS using Gorilla.  
 
 Video #10: https://www.youtube.com/watch?v=ctmhYJpGsgU  
+File uploads etc.  
 
+Video #11: https://www.youtube.com/watch?v=ctmhYJpGsgU  
+Multipart uploads.  
+
+Video #12: https://www.youtube.com/watch?v=GtSg1H7SU5Y  
+Gzip compression for HTTP responses.  
 
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.

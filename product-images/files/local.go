@@ -35,7 +35,7 @@ func (l *Local) Save(path string, contents io.Reader) error {
 
 	// get the directory and make sure it exists
 	d := filepath.Dir(fp)
-	err := os.MkdirAll(d, os.ModeDir)
+	err := os.MkdirAll(d, 0777) // NOTE: This was to address permissions error trying to upload. Previously `os.ModeDir`
 	if err != nil {
 		return xerrors.Errorf("Unable to create directory: %w", err)
 	}

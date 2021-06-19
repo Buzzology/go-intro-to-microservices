@@ -43,10 +43,14 @@ func main() {
 
 	// create the handlers
 	fh := handlers.NewFiles(stor, l)
+	mw := handlers.GzipHandler{}
 
 	// create a new serve mux and register the handlers
 	sm := mux.NewRouter()
 	corsHandler := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"*"}))
+
+	// Add any custom middleware
+	sm.Use(mw.GzipMiddleware)
 
 	// filename regex: {filename:[a-zA-Z]+\\.[a-z]{3}}
 	// problem with FileServer is that is dumb
