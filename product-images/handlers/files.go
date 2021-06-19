@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"io"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"github.com/Buzzology/go-intro-to-microservices/product-images/files"
 	"github.com/gorilla/mux"
@@ -20,8 +22,8 @@ func NewFiles(s files.Storage, l hclog.Logger) *Files {
 	return &Files{store: s, log: l}
 }
 
-// ServeHTTP implements the http.Handler interface
-func (f *Files) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+// UploadREST implements the http.Handler interface
+func (f *Files) UploadREST(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	fn := vars["filename"]
@@ -35,7 +37,36 @@ func (f *Files) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that the filepath is a valid name and file
-	f.saveFile(id, fn, rw, r)
+	f.saveFile(id, fn, rw, r.Body)
+}
+
+// UploadMultipart implements the http.Handler interface
+func (f *Files) UploadMultipart(rw http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(128 * 1024)
+	if err != nil {
+		f.log.Error("Bad request", err)
+		http.Error(rw, "Expected multipart form data", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(r.FormValue("id"))
+	if err != nil {
+		f.log.Info("Id is invalid %v", id)
+		http.Error(rw, "Id is invalid: %v", id)
+		return
+	}
+
+	f.log.Info("Process form for %v", id)
+
+	file, fileHeader, err := r.FormFile("file")
+	if err != nil {
+		f.log.Error("Error retrieving file", err)
+		http.Error(rw, "Expected file", http.StatusBadRequest)
+		return
+	}
+
+	f.saveFile(r.FormValue("id"), fileHeader.Filename, rw, file)
+
 }
 
 func (f *Files) invalidURI(uri string, rw http.ResponseWriter) {
@@ -44,11 +75,11 @@ func (f *Files) invalidURI(uri string, rw http.ResponseWriter) {
 }
 
 // saveFile saves the contents of the request to a file
-func (f *Files) saveFile(id, path string, rw http.ResponseWriter, r *http.Request) {
+func (f *Files) saveFile(id, path string, rw http.ResponseWriter, file io.ReadCloser) {
 	f.log.Info("Save file for product", "id", id, "path", path)
 
 	fp := filepath.Join(id, path)
-	err := f.store.Save(fp, r.Body)
+	err := f.store.Save(fp, file)
 	if err != nil {
 		f.log.Error("Unable to save file", "error", err)
 		http.Error(rw, "Unable to save file", http.StatusInternalServerError)

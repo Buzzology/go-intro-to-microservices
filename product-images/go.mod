@@ -5,6 +5,7 @@ go 1.16
 replace github.com/Buzzology/go-intro-to-microservices/product-images => ./
 
 require (
+	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/go-hclog v0.16.1
 	github.com/nicholasjackson/env v0.6.0
