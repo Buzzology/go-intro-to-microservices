@@ -2,24 +2,36 @@ package main
 
 import (
 	"context"
+	protos "github.com/Buzzology/go-intro-to-microservices/currency/protos/currency"
+	"github.com/Buzzology/go-intro-to-microservices/product-api/handlers"
+	"github.com/go-openapi/runtime/middleware"
+	gohandlers "github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/Buzzology/go-intro-to-microservices/product-api/handlers"
-	"github.com/go-openapi/runtime/middleware"
-	"github.com/gorilla/mux"
-	gohandlers "github.com/gorilla/handlers"
 )
 
 func main() {
 
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
-	productHandler := handlers.NewProducts(l)
+
+	// Create gRPC client
+	conn, err := grpc.Dial("localhost:9092", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+
+	defer conn.Close()
+	currencyClient := protos.NewCurrencyClient(conn)
 
 	sm := mux.NewRouter()
+
+	// Instantiate the product handlers
+	productHandler := handlers.NewProducts(l, currencyClient)
 
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/", productHandler.GetProducts)
@@ -42,7 +54,7 @@ func main() {
 	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	// CORS
-	ch := gohandlers.CORS(gohandlers.AllowedOrigins([]string { "http://localhost:3000"}))
+	ch := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"http://localhost:3000"}))
 
 	s := http.Server{
 		Addr:         "127.0.0.1:9090",
@@ -60,7 +72,6 @@ func main() {
 	}()
 
 	l.Println("Starting Product API...")
-
 
 	// Make a channel of os signal type
 	sigChan := make(chan os.Signal)

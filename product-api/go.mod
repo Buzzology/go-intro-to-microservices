@@ -4,7 +4,10 @@ go 1.16
 
 replace github.com/Buzzology/go-intro-to-microservices/product-api => ./
 
+replace github.com/Buzzology/go-intro-to-microservices/currency => ../currency
+
 require (
+	github.com/Buzzology/go-intro-to-microservices/currency v0.0.0-00010101000000-000000000000
 	github.com/go-openapi/runtime v0.19.29
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible

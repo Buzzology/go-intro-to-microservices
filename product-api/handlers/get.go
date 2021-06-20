@@ -1,8 +1,10 @@
 package handlers
 
 import (
-	"net/http"
+	"context"
+	protos "github.com/Buzzology/go-intro-to-microservices/currency/protos/currency"
 	"github.com/Buzzology/go-intro-to-microservices/product-api/data"
+	"net/http"
 )
 
 // swagger:route GET /products products listProducts
@@ -16,5 +18,21 @@ func (p *Products) GetProducts(rw http.ResponseWriter, h *http.Request) {
 	err := listProducts.ToJSON(rw)
 	if err != nil {
 		http.Error(rw, "Unable to marshal products", http.StatusInternalServerError)
+	}
+
+	// Get exchange rate via gRPC
+	rr := protos.RateRequest{
+		Base:        protos.Currencies_EUR,
+		Destination: protos.Currencies_GBP,
+	}
+	resp, err := p.cc.GetRate(context.Background(), &rr)
+	if err != nil {
+		p.l.Println("[ERROR] error getting new rate", err)
+		return
+	}
+
+	// Update the price based on exchange rate
+	for _, prod := range listProducts {
+		prod.Price = prod.Price * resp.Rate
 	}
 }

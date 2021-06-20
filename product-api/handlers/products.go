@@ -18,9 +18,10 @@ package handlers
 import (
 	"context"
 	"fmt"
+	protos "github.com/Buzzology/go-intro-to-microservices/currency/protos/currency"
+	"github.com/Buzzology/go-intro-to-microservices/product-api/data"
 	"log"
 	"net/http"
-	"github.com/Buzzology/go-intro-to-microservices/product-api/data"
 )
 
 // A list of products returned in the response (note this is only used for doco)
@@ -28,7 +29,7 @@ import (
 type productsResponseWrapper struct {
 	// All products in the system
 	// in: body
-	Body[]data.Product
+	Body []data.Product
 }
 
 // swagger:parameters deleteProduct
@@ -40,22 +41,21 @@ type productIdParameterWrapper struct {
 }
 
 // swagger:response NoContent
-type productsNoContent struct {}
+type productsNoContent struct{}
 
 type Products struct {
-	l *log.Logger
+	l  *log.Logger
+	cc protos.CurrencyClient
 }
 
-func NewProducts(l *log.Logger) *Products {
-	return &Products{l}
+func NewProducts(l *log.Logger, cc protos.CurrencyClient) *Products {
+	return &Products{l, cc}
 }
 
-
-type KeyProduct struct {}
-
+type KeyProduct struct{}
 
 func (p Products) MiddlewareProductionValidation(next http.Handler) http.Handler {
-	return http.HandlerFunc(func (rw http.ResponseWriter, req *http.Request) {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		product := &data.Product{}
 		err := product.FromJSON(req.Body)
 		if err != nil {
@@ -76,7 +76,7 @@ func (p Products) MiddlewareProductionValidation(next http.Handler) http.Handler
 		// Will need to confirm (i think this was said in the golang podcast).
 		ctx := context.WithValue(req.Context(), KeyProduct{}, *product)
 		req = req.WithContext(ctx)
-		
+
 		next.ServeHTTP(rw, req)
 	})
 }
