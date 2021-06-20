@@ -43,6 +43,11 @@ gRPC and protocol buffers
 Video #14: https://www.youtube.com/watch?v=oTBcd5J0VYU  
 gRPC client connections
 
+Video #15 (Part 1): https://www.youtube.com/watch?v=Vl88R9acq-Y
+Refactoring, retrieving exchange rates dynamically, first test.  
+
+
+
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.
 
@@ -139,4 +144,7 @@ se": "GBP", "Destination": "USD" }' localhost:9092 currency.Currency.GetRate
 {
   "Rate": 2.5
 }
-ß```
+```
+
+## Testing  
+Run a test in currency project: `go test -v ./data`  
