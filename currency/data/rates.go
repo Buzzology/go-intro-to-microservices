@@ -13,6 +13,21 @@ type ExchangeRates struct {
 	rates map[string]float64
 }
 
+// GetRate get the exchange rate between these two currencies
+func (e *ExchangeRates) GetRate(base, dest string) (float64, error) {
+	br, ok := e.rates[base]
+	if ok != true {
+		return 0, fmt.Errorf("rate no found for currency %v", base)
+	}
+
+	dr, ok := e.rates[dest]
+	if ok != true {
+		return 0, fmt.Errorf("rate no found for currency %v", dest)
+	}
+
+	return dr / br, nil
+}
+
 func NewRates(l hclog.Logger) (*ExchangeRates, error) {
 	exchangeRates := &ExchangeRates{log: l, rates: map[string]float64{}}
 
@@ -50,6 +65,8 @@ func (e *ExchangeRates) getRates() error {
 
 		e.rates[cube.Currency] = r
 	}
+
+	e.rates["EUR"] = 1
 
 	return nil
 }

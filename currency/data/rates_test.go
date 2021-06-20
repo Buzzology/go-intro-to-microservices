@@ -13,7 +13,8 @@ func TestNewRates(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(tr.rates) == 0 {
+	// Needs to be more than one as we always populate EUR as 1
+	if len(tr.rates) > 1 {
 		t.Fatal("Expected at least one rate to be assigned.")
 	}
 

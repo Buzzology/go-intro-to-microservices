@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/Buzzology/go-intro-to-microservices/currency/data"
 	protos "github.com/Buzzology/go-intro-to-microservices/currency/protos/currency"
 	"github.com/Buzzology/go-intro-to-microservices/currency/server"
 	"github.com/hashicorp/go-hclog"
@@ -19,8 +20,15 @@ func main() {
 	// Create a new gRPC server, use WithInsecure to allow http connections
 	gs := grpc.NewServer()
 
+	// Prepare the rates that we're going to use
+	er, err := data.NewRates(log)
+	if err != nil {
+		log.Error("Unable to instantiate exchange rates", err)
+		os.Exit(1)
+	}
+
 	// Create an instance of the Currency server
-	cs := server.NewCurrency(log)
+	cs := server.NewCurrency(er, log)
 
 	// Register the currency server
 	protos.RegisterCurrencyServer(gs, cs)

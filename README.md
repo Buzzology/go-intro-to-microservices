@@ -46,6 +46,8 @@ gRPC client connections
 Video #15 (Part 1): https://www.youtube.com/watch?v=Vl88R9acq-Y
 Refactoring, retrieving exchange rates dynamically, first test.  
 
+Video #15 (Part 2): https://www.youtube.com/watch?v=QBl8LZ0Rems  
+Refactoring, 
 
 
 ## Setup notes
