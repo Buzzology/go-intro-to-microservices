@@ -37,6 +37,12 @@ Multipart uploads.
 Video #12: https://www.youtube.com/watch?v=GtSg1H7SU5Y  
 Gzip compression for HTTP responses.  
 
+Video #13: https://www.youtube.com/watch?v=pMgty_RYIOc  
+gRPC and protocol buffers  
+
+Video #14: https://www.youtube.com/watch?v=oTBcd5J0VYU  
+gRPC client connections
+
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.
 
@@ -96,3 +102,41 @@ package handlers  // NOTE: Line break above removed
 import (
 ```
 
+## gRPC and Protobuffs  
+Install protoc etc
+```
+$ brew install protobuf
+$ protoc --version  # Ensure compiler version is 3+
+```
+
+Run following command to generate (or add to makefile)
+```
+protoc -I protos/ protos/currency.proto --go-grpc_out=protos/currency
+```
+
+### gRPC Curl
+Install: `brew install grpcurl`  
+List services: `grpcurl --plaintext localhost:9092 list`  
+Describe service
+```
+grpcurl --plaintext localhost:9092 describe currency.Currency.GetRate
+currency.Currency.GetRate is a method:
+rpc GetRate ( .currency.RateRequest ) returns ( .currency.RateResponse );
+```
+Describe message
+```
+grpcurl --plaintext localhost:9092 describe currency.RateRequest 
+currency.RateRequest is a message:
+message RateRequest {
+  string Base = 1;
+  string Destination = 2;
+}
+```
+Send a request
+```
+grpcurl --plaintext -d '{"Ba
+se": "GBP", "Destination": "USD" }' localhost:9092 currency.Currency.GetRate
+{
+  "Rate": 2.5
+}
+ß```
