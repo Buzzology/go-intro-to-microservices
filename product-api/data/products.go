@@ -68,7 +68,7 @@ func (p *ProductsDB) GetProducts(currency string) (Products, error) {
 		pr = append(pr, &np)
 	}
 
-	return productList, nil
+	return pr, nil
 }
 
 // Product defines the structure for an API product
@@ -116,32 +116,32 @@ func validateSKU(fl validator.FieldLevel) bool {
 
 type Products []*Product
 
-func GetProducts() Products {
-	return productList
-}
+//func (p *ProductsDB) GetProducts() Products {
+//	return productList
+//}
 
 func (p *Products) ToJSON(w io.Writer) error {
 	e := json.NewEncoder(w)
 	return e.Encode(p)
 }
 
-func AddProduct(p *Product) {
-	p.ID = getNextID()
-	productList = append(productList, p)
+func (p *ProductsDB) AddProduct(prod *Product) {
+	prod.ID = getNextID()
+	productList = append(productList, prod)
 }
 
-func UpdateProduct(id int, p *Product) error {
+func (p *ProductsDB) UpdateProduct(id int, prod *Product) error {
 	_, index, err := findProduct(id)
 	if err != nil {
 		return err
 	}
 
-	p.ID = id
-	productList[index] = p
+	prod.ID = id
+	productList[index] = prod
 	return nil
 }
 
-func DeleteProduct(id int) error {
+func (p *ProductsDB) DeleteProduct(id int) error {
 	_, index, err := findProduct(id)
 	if err != nil {
 		return err
@@ -194,7 +194,7 @@ func (p *ProductsDB) getRate(destination string) (float64, error) {
 	// Get exchange rate via gRPC
 	rr := protos.RateRequest{
 		Base:        protos.Currencies_EUR,
-		Destination: protos.Currencies_GBP,
+		Destination: protos.Currencies(protos.Currencies_value[destination]),
 	}
 
 	resp, err := p.currency.GetRate(context.Background(), &rr)
@@ -204,4 +204,32 @@ func (p *ProductsDB) getRate(destination string) (float64, error) {
 	}
 
 	return resp.Rate, nil
+}
+
+// UpdateProduct replaces a product in the database with the given
+// item.
+// If a product with the given id does not exist in the database
+// this function returns a ProductNotFound error
+//func (p *ProductsDB) UpdateProduct(pr Product) error {
+//	i := findIndexByProductID(pr.ID)
+//	if i == -1 {
+//		return ErrProductNotFound
+//	}
+//
+//	// update the product in the DB
+//	productList[i] = &pr
+//
+//	return nil
+//}
+
+// findIndex finds the index of a product in the database
+// returns -1 when no product can be found
+func findIndexByProductID(id int) int {
+	for i, p := range productList {
+		if p.ID == id {
+			return i
+		}
+	}
+
+	return -1
 }

@@ -47,8 +47,13 @@ Video #15 (Part 1): https://www.youtube.com/watch?v=Vl88R9acq-Y
 Refactoring, retrieving exchange rates dynamically, first test.  
 
 Video #15 (Part 2): https://www.youtube.com/watch?v=QBl8LZ0Rems  
-Refactoring, 
+Refactoring, cleanup product api.  
 
+Video #15 (Part 3): https://www.youtube.com/watch?v=ARvOyAsuFog
+Refactoring, fixed quite a few bugs and typos, completed exchange functionality.  
+
+Video #16 (Part 1): https://www.youtube.com/watch?v=4ohwkWVgEZM  
+Bi-directional streaming with gRPC.
 
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.

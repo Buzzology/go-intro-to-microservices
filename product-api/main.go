@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	protos "github.com/Buzzology/go-intro-to-microservices/currency/protos/currency"
+	"github.com/Buzzology/go-intro-to-microservices/product-api/data"
 	"github.com/Buzzology/go-intro-to-microservices/product-api/handlers"
 	"github.com/go-openapi/runtime/middleware"
 	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/hashicorp/go-hclog"
 	"google.golang.org/grpc"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,7 +18,7 @@ import (
 
 func main() {
 
-	l := log.New(os.Stdout, "product-api", log.LstdFlags)
+	l := hclog.Default()
 
 	// Create gRPC client
 	conn, err := grpc.Dial("localhost:9092", grpc.WithInsecure())
@@ -30,14 +31,20 @@ func main() {
 
 	sm := mux.NewRouter()
 
+	// Instantiate the product db
+	db := data.NewProductsDB(currencyClient, l)
+
 	// Instantiate the product handlers
-	productHandler := handlers.NewProducts(l, currencyClient)
+	productHandler := handlers.NewProducts(l, db)
 
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", productHandler.GetProducts)
+	getRouter.HandleFunc("/products", productHandler.ListAll).Queries("currency", "{[A-Z]{3}}")
+	getRouter.HandleFunc("/products", productHandler.ListAll)
+	getRouter.HandleFunc("/products/{id:[0-9]}", productHandler.ListSingle).Queries("currency", "{[A-Z]{3}}")
+	getRouter.HandleFunc("/products/{id:[0-9]}", productHandler.ListSingle)
 
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
-	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct)
+	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.Update)
 	putRouter.Use(productHandler.MiddlewareProductionValidation)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
@@ -45,7 +52,7 @@ func main() {
 	postRouter.Use(productHandler.MiddlewareProductionValidation)
 
 	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
-	deleteRouter.HandleFunc("/{id:[0-9]+}", productHandler.DeleteProduct)
+	deleteRouter.HandleFunc("/{id:[0-9]+}", productHandler.Delete)
 
 	// Add swagger
 	opt := middleware.RedocOpts{SpecURL: "/swagger.yaml"} // Points to generated swagger
@@ -62,16 +69,18 @@ func main() {
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
+		ErrorLog:     l.StandardLogger(&hclog.StandardLoggerOptions{}),
 	}
 
 	go func() {
+
 		err := s.ListenAndServe()
 		if err != nil {
-			l.Fatal(err)
+			l.Error("Failed to start", "err", err)
 		}
 	}()
 
-	l.Println("Starting Product API...")
+	l.Info("Starting Product API...")
 
 	// Make a channel of os signal type
 	sigChan := make(chan os.Signal)
@@ -79,10 +88,13 @@ func main() {
 	signal.Notify(sigChan, os.Kill)
 
 	sig := <-sigChan // Read from signal channel (this appears to block until a message is received on the channel. Message is received when kill or cancel are invoked)
-	l.Println("Received terminate, graceful shutdown", sig)
+	l.Info("Received terminate, graceful shutdown", sig)
 
 	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 	// Doesn't accept any new connections and waits for current ones to be handled before shutting down
-	s.Shutdown(tc)
+	err = s.Shutdown(tc)
+	if err != nil {
+		l.Error("Failed to handle error", "error", err)
+	}
 }

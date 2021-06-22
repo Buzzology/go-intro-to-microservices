@@ -1,11 +1,8 @@
 package handlers
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/Buzzology/go-intro-to-microservices/product-api/data"
-	"github.com/gorilla/mux"
+	"net/http"
 )
 
 // swagger:route DELETE /products/{id} products deleteProduct
@@ -14,23 +11,28 @@ import (
 // 201: NoContent
 
 // DeleteProduct deletes a product from the database
-func (p *Products) DeleteProduct(rw http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-	id, err := strconv.Atoi(vars["id"])
+func (p *Products) Delete(rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Add("Content-Type", "application/json")
+	id := getProductID(req)
+
+	p.l.Debug("Deleting record", "id", id)
+
+	err := p.productDB.DeleteProduct(id)
+	if err == data.ErrProductNotFound {
+		p.l.Error("Unable to delete record id does not exist")
+
+		rw.WriteHeader(http.StatusNotFound)
+		data.ToJSON(&GenericError{Message: err.Error()}, rw)
+		return
+	}
+
 	if err != nil {
-		http.Error(rw, "Invalid id", http.StatusBadRequest)
-		return
-	}
-	
-	if err = data.DeleteProduct(id); err != nil {
-		if err == data.ErrProductNotFound {
-			http.Error(rw, "Product not found.", http.StatusNotFound)
-			return
-		}
+		p.l.Error("Unable to delete record", "error", err)
 
-		http.Error(rw, "An error occurred while updating product.", http.StatusInternalServerError)
+		rw.WriteHeader(http.StatusInternalServerError)
+		data.ToJSON(&GenericError{Message: err.Error()}, rw)
 		return
 	}
 
-	p.l.Printf("Product deleted: %s", id)
+	rw.WriteHeader(http.StatusNoContent)
 }

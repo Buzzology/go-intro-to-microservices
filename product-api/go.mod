@@ -13,6 +13,8 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
+	github.com/hashicorp/go-hclog v0.16.1
 	github.com/leodido/go-urn v1.2.1 // indirect
+	google.golang.org/grpc v1.38.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )

@@ -18,10 +18,11 @@ package handlers
 import (
 	"context"
 	"fmt"
-	protos "github.com/Buzzology/go-intro-to-microservices/currency/protos/currency"
 	"github.com/Buzzology/go-intro-to-microservices/product-api/data"
-	"log"
+	"github.com/gorilla/mux"
+	"github.com/hashicorp/go-hclog"
 	"net/http"
+	"strconv"
 )
 
 // A list of products returned in the response (note this is only used for doco)
@@ -44,12 +45,12 @@ type productIdParameterWrapper struct {
 type productsNoContent struct{}
 
 type Products struct {
-	l  *log.Logger
-	cc protos.CurrencyClient
+	l         hclog.Logger
+	productDB *data.ProductsDB
 }
 
-func NewProducts(l *log.Logger, cc protos.CurrencyClient) *Products {
-	return &Products{l, cc}
+func NewProducts(l hclog.Logger, productDB *data.ProductsDB) *Products {
+	return &Products{l, productDB}
 }
 
 type KeyProduct struct{}
@@ -59,14 +60,14 @@ func (p Products) MiddlewareProductionValidation(next http.Handler) http.Handler
 		product := &data.Product{}
 		err := product.FromJSON(req.Body)
 		if err != nil {
-			p.l.Println("[ERROR] unmarshalling product", err)
+			p.l.Debug("[ERROR] unmarshalling product", err)
 			http.Error(rw, "Failed to unmarshal request body into product.", http.StatusBadRequest)
 			return // If it fails to validate we terminate the handler chain
 		}
 
 		err = product.Validate()
 		if err != nil {
-			p.l.Println("[ERROR] validating product", err)
+			p.l.Debug("[ERROR] validating product", err)
 			http.Error(rw, fmt.Sprintf("Failed to validate product. %s", err), http.StatusBadRequest)
 			return
 		}
@@ -79,4 +80,27 @@ func (p Products) MiddlewareProductionValidation(next http.Handler) http.Handler
 
 		next.ServeHTTP(rw, req)
 	})
+}
+
+// GenericError is a generic error message returned by a server
+type GenericError struct {
+	Message string `json:"message"`
+}
+
+// getProductID returns the product ID from the URL
+// Panics if cannot convert the id into an integer
+// this should never happen as the router ensures that
+// this is a valid number
+func getProductID(r *http.Request) int {
+	// parse the product id from the url
+	vars := mux.Vars(r)
+
+	// convert the id into an integer and return
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		// should never happen
+		panic(err)
+	}
+
+	return id
 }
