@@ -144,6 +144,23 @@ message RateRequest {
   string Destination = 2;
 }
 ```
+
+Get a template  
+```
+grpcurl --plaintext --msg-template localhost:9092 describe currency.RateRequest 
+currency.RateRequest is a message:
+message RateRequest {
+  .currency.Currencies Base = 1;
+  .currency.Currencies Destination = 2;
+}
+
+Message template:
+{
+  "Base": "EUR",
+  "Destination": "EUR"
+}
+```
+
 Send a request
 ```
 grpcurl --plaintext -d '{"Ba
@@ -151,6 +168,11 @@ se": "GBP", "Destination": "USD" }' localhost:9092 currency.Currency.GetRate
 {
   "Rate": 2.5
 }
+```
+
+Stream response
+```
+grpcurl --plaintext --msg-template -d @ localhost:9092 currency.Currency/SubscribeRates
 ```
 
 ## Testing  
