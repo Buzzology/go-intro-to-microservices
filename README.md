@@ -55,6 +55,9 @@ Refactoring, fixed quite a few bugs and typos, completed exchange functionality.
 Video #16 (Part 1): https://www.youtube.com/watch?v=4ohwkWVgEZM  
 Bi-directional streaming with gRPC.
 
+Video $16 (Part 2): https://www.youtube.com/watch?v=MT5tXSKa-KY
+Bi-directional streaming with gRPC continued. Added bi-directional stream between product api and currency service. Exchange rates are now kept in sync.
+
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.
 
@@ -156,8 +159,8 @@ message RateRequest {
 
 Message template:
 {
-  "Base": "EUR",
-  "Destination": "EUR"
+  "Base": "USD",
+  "Destination": "JPY"
 }
 ```
 

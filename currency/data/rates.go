@@ -4,8 +4,10 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/hashicorp/go-hclog"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type ExchangeRates struct {
@@ -26,6 +28,48 @@ func (e *ExchangeRates) GetRate(base, dest string) (float64, error) {
 	}
 
 	return dr / br, nil
+}
+
+// MonitorRates checks the rates in the ECB API and sends messages to the returned channel when there are changes.
+// NOTE: The ECB API only updates once a day
+func (e *ExchangeRates) MonitorRates(interval time.Duration) chan struct{} {
+	ret := make(chan struct{})
+
+	go func() {
+		ticker := time.NewTicker(interval)
+		for {
+			select {
+			case <-ticker.C:
+				// Just add a random difference to the rate and return it. This simulates the fluctuations in currency rates.
+				for currency, rate := range e.rates {
+
+					// Change can be 10% of original value
+					change := (rand.Float64() / 10)
+
+					// Is this a positive or negative change
+					direction := rand.Intn(1)
+
+					if direction == 0 {
+						// New value will be min 90% of old
+						change = 1 - change
+					} else {
+						// New value wil lbe 110% of old
+						change = 1 + change
+					}
+
+					// Modify the rate
+					e.rates[currency] = rate * change
+				}
+
+				// Notify updates, this will block unless there is a listener on the other end
+				// This seems to send an "empty" value via the channel to inform the receiver that a change has occurred
+				// and they should retrieve an updated list of rates
+				ret <- struct{}{}
+			}
+		}
+	}()
+
+	return ret
 }
 
 func NewRates(l hclog.Logger) (*ExchangeRates, error) {

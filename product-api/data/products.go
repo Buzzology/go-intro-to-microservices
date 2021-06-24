@@ -16,10 +16,48 @@ import (
 type ProductsDB struct {
 	currency protos.CurrencyClient
 	log      hclog.Logger
+	rates    map[string]float64
+	client   protos.Currency_SubscribeRatesClient
 }
 
 func NewProductsDB(c protos.CurrencyClient, l hclog.Logger) *ProductsDB {
-	return &ProductsDB{c, l}
+
+	// Create a new instance of products db
+	productsDb := &ProductsDB{c, l, make(map[string]float64), nil}
+
+	// Subscribe to exchange rate changes so that our local cache doesn't go stale
+	go productsDb.handleUpdates()
+
+	return productsDb
+}
+
+// handleUpdates subscribes to the currency server and handles updating the exchange rate in our local cache
+func (p *ProductsDB) handleUpdates() {
+
+	// Setup a subscription to rate changes
+	sub, err := p.currency.SubscribeRates(context.Background())
+	if err != nil {
+		p.log.Error("Failed to subscribe to rates", "error", err)
+		return
+	}
+
+	// Add the client to the db
+	p.client = sub
+
+	for {
+
+		// Handle changes received as rate responses. NOTE: receive is blocking
+		rateResponse, err := sub.Recv()
+		if err != nil {
+			p.log.Error("Failed to retrieve rate", "error", err)
+			return
+		}
+
+		p.log.Info(fmt.Sprintf("Receive updated rate from currency stream: %v:%v %v", rateResponse.Base, rateResponse.Destination, rateResponse.Rate))
+
+		// Update the exchange rate in the local cache
+		p.rates[rateResponse.GetDestination().String()] = rateResponse.Rate
+	}
 }
 
 func (p *ProductsDB) GetProductByID(id int, currency string) (Product, error) {
@@ -116,10 +154,6 @@ func validateSKU(fl validator.FieldLevel) bool {
 
 type Products []*Product
 
-//func (p *ProductsDB) GetProducts() Products {
-//	return productList
-//}
-
 func (p *Products) ToJSON(w io.Writer) error {
 	e := json.NewEncoder(w)
 	return e.Encode(p)
@@ -191,16 +225,31 @@ var productList = Products{
 
 func (p *ProductsDB) getRate(destination string) (float64, error) {
 
-	// Get exchange rate via gRPC
+	// If it's in our local cache just return that
+	if _, ok := p.rates[destination]; ok {
+		return p.rates[destination], nil
+	}
+
+	// Prepare rate request
 	rr := protos.RateRequest{
 		Base:        protos.Currencies_EUR,
 		Destination: protos.Currencies(protos.Currencies_value[destination]),
 	}
 
+	// Get initial exchange rate via gRPC
 	resp, err := p.currency.GetRate(context.Background(), &rr)
 	if err != nil {
 		p.log.Error("unable to get rate", "destination", destination, "error", err)
 		return 0, err
+	}
+
+	// Set the initial rate
+	p.rates[destination] = resp.Rate
+
+	// Subscribe to future rates
+	err = p.client.Send(&rr)
+	if err != nil {
+		p.log.Error("failed to subscribe to future updates", "error", err)
 	}
 
 	return resp.Rate, nil
