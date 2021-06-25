@@ -6,6 +6,8 @@ import (
 	"github.com/Buzzology/go-intro-to-microservices/currency/data"
 	protos "github.com/Buzzology/go-intro-to-microservices/currency/protos/currency"
 	"github.com/hashicorp/go-hclog"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"io"
 	"time"
 )
@@ -67,6 +69,18 @@ func (c *Currency) handleUpdates() {
 func (c *Currency) GetRate(ctx context.Context, rr *protos.RateRequest) (*protos.RateResponse, error) {
 	c.log.Info("Handle GetRate", "base", rr.GetBase(), "destination", rr.GetDestination())
 
+	// Ensure that destination and base are not the same
+	if rr.Base == rr.Destination {
+		err := status.Newf(codes.InvalidArgument, "Base currency cannot be the same as the destination")
+		err, withDetailsError := err.WithDetails(rr)
+		if withDetailsError != nil {
+			return nil, withDetailsError
+		}
+
+		return nil, err.Err()
+	}
+
+	// Retrieve the rate
 	rate, err := c.rates.GetRate(rr.GetBase().String(), rr.GetDestination().String())
 	if err != nil {
 		c.log.Error("failed to get rate", err)

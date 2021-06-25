@@ -6,6 +6,8 @@ import (
 	"fmt"
 	protos "github.com/Buzzology/go-intro-to-microservices/currency/protos/currency"
 	"github.com/hashicorp/go-hclog"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"io"
 	"regexp"
 	"time"
@@ -76,6 +78,20 @@ func (p *ProductsDB) GetProductByID(id int, currency string) (Product, error) {
 	// Retrieve the exchange rate
 	rate, err := p.getRate(currency)
 	if err != nil {
+
+		// Check if we have access to detailed error
+		if status, ok := status.FromError(err); ok {
+
+			// Extract the returned rate request
+			messageDetails := status.Details()[0].(*protos.RateRequest)
+
+			if status.Code() == codes.InvalidArgument {
+				return *product, fmt.Errorf("unable to get rate from currency server. Destination and base currencies cannot be the same")
+			}
+
+			return *product, fmt.Errorf("unable to get rate from currency server. Base: %s Destination %s", messageDetails.Base, messageDetails.Destination)
+		}
+
 		return *product, err
 	}
 

@@ -52,11 +52,17 @@ Refactoring, cleanup product api.
 Video #15 (Part 3): https://www.youtube.com/watch?v=ARvOyAsuFog
 Refactoring, fixed quite a few bugs and typos, completed exchange functionality.  
 
-Video #16 (Part 1): https://www.youtube.com/watch?v=4ohwkWVgEZM  
+Video #16: https://www.youtube.com/watch?v=4ohwkWVgEZM  
 Bi-directional streaming with gRPC.
 
-Video $16 (Part 2): https://www.youtube.com/watch?v=MT5tXSKa-KY
+Video #17: https://www.youtube.com/watch?v=MT5tXSKa-KY
 Bi-directional streaming with gRPC continued. Added bi-directional stream between product api and currency service. Exchange rates are now kept in sync.
+
+Video #18: https://www.youtube.com/watch?v=9QS33m8vnag  
+gRPC error messages in unary rpcs.
+
+Video #19: https://www.youtube.com/watch?v=IT4OfN27D4c  
+gRPC error messages in bi-directional streams.
 
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.
