@@ -55,10 +55,23 @@ func (p *ProductsDB) handleUpdates() {
 			return
 		}
 
-		p.log.Info(fmt.Sprintf("Receive updated rate from currency stream: %v:%v %v", rateResponse.Base, rateResponse.Destination, rateResponse.Rate))
+		// Check if the response is a streamed error type (the one we created using oneof)
+		if grpcError := rateResponse.GetError(); grpcError != nil {
+			p.log.Error("Error subscribing for rates", "error", grpcError)
+			continue
+		}
 
-		// Update the exchange rate in the local cache
-		p.rates[rateResponse.GetDestination().String()] = rateResponse.Rate
+		// Check if it's a rate response (successful message)
+		if resp := rateResponse.GetRateResponse(); resp != nil {
+
+			p.log.Info(fmt.Sprintf("Receive updated rate from currency stream: %v:%v %v", resp.Base, resp.Destination, resp.Rate))
+
+			// Update the exchange rate in the local cache
+			p.rates[resp.GetDestination().String()] = resp.Rate
+			continue
+		}
+
+		p.log.Error("Unexpected message type received")
 	}
 }
 

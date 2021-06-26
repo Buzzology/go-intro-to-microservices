@@ -1,11 +1,13 @@
 syntax = "proto3";
 package currency;
 
+import "google/rpc/status.proto";
+
 option go_package = "/currency";
 
 service Currency {
   rpc GetRate(RateRequest) returns (RateResponse);
-  rpc SubscribeRates(stream RateRequest) returns (stream RateResponse);
+  rpc SubscribeRates(stream RateRequest) returns (stream StreamingRateResponse);
 }
 
 message RateRequest {
@@ -19,6 +21,13 @@ message RateResponse {
   Currencies Destination = 3;
 }
 
+
+message StreamingRateResponse {
+  oneof message {
+    RateResponse rate_response = 1;
+    google.rpc.Status error = 2;
+  }
+}
 
 // Currencies is an enum which represents the allowed currencies for the API
 enum Currencies {

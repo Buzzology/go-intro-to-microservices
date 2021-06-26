@@ -62,7 +62,9 @@ Video #18: https://www.youtube.com/watch?v=9QS33m8vnag
 gRPC error messages in unary rpcs.
 
 Video #19: https://www.youtube.com/watch?v=IT4OfN27D4c  
-gRPC error messages in bi-directional streams.
+gRPC error messages in bi-directional streams. Using `oneof` to return "errors" or "messages" in a stream.
+
+This completes all videos released so far, but he has recently mentioned he may do more.    
 
 ## Setup notes
 Avoid firewall prompt on startup by explicitly setting localhost ip for `ListenAndServe`.

@@ -56,7 +56,15 @@ func (c *Currency) handleUpdates() {
 				}
 
 				// Stream the updated rate to the client
-				err = client.Send(&protos.RateResponse{Rate: rate, Base: rateRequest.Base, Destination: rateRequest.Destination})
+				err = client.Send(&protos.StreamingRateResponse{
+					Message: &protos.StreamingRateResponse_RateResponse{
+						RateResponse: &protos.RateResponse{
+							Rate:        rate,
+							Base:        rateRequest.Base,
+							Destination: rateRequest.Destination,
+						},
+					}})
+
 				if err != nil {
 					c.log.Error("Failed to stream rate to client", "error", err)
 				}
@@ -115,7 +123,42 @@ func (c *Currency) SubscribeRates(src protos.Currency_SubscribeRatesServer) erro
 			rateRequests = []*protos.RateRequest{}
 		}
 
-		// Add the request to the map
+		// Check that the subscription doesnt already exist
+		var validationError *status.Status
+		for _, v := range rateRequests {
+
+			// Ensure that the subscription doesn't already exist
+			if v.Base == rateRequest.Base && v.Destination == rateRequest.Destination {
+
+				// Return errors as part of SubscriptionStreamResponse
+				validationError := status.Newf(
+					codes.AlreadyExists,
+					"Unable to subscribe for currency as subscription already exists")
+
+				validationError, err = validationError.WithDetails(rateRequest)
+				if err != nil {
+					c.log.Error("unable to add metadata to error", "error", err)
+					break
+				}
+
+				// Exit loop, we've already found that there is an existing subscription
+				break
+			}
+		}
+
+		// We've found an error, send it to the client and move onto the next rate request
+		if validationError != nil {
+
+			// Send the error to the client
+			src.Send(&protos.StreamingRateResponse{Message: &protos.StreamingRateResponse_Error{
+				Error: validationError.Proto(), // This converts out status type into the required status type (need to look into why needed)
+			}})
+
+			// Move onto or wait for the next rate request
+			continue
+		}
+
+		// Everything should be okay if we've made it this far, add the request to the map
 		rateRequests = append(rateRequests, rateRequest)
 
 		// Update the client's list of subscriptions
